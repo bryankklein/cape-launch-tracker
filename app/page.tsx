@@ -1,4 +1,9 @@
 import Countdown from "./Countdown";
+import {
+  findForecastForTime,
+  getCapeHourlyForecast,
+  type HourlyForecast,
+} from "./weather";
 
 type Launch = {
   id: string;
@@ -59,7 +64,13 @@ function statusBadgeClasses(abbrev: string): string {
   return "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
 }
 
-function LaunchCard({ launch }: { launch: Launch }) {
+function LaunchCard({
+  launch,
+  forecast,
+}: {
+  launch: Launch;
+  forecast: HourlyForecast | null;
+}) {
   const rocket =
     launch.rocket.configuration.full_name || launch.rocket.configuration.name;
   const mission = launch.mission?.name ?? "Mission TBD";
@@ -100,13 +111,30 @@ function LaunchCard({ launch }: { launch: Launch }) {
           <span className="text-zinc-500 dark:text-zinc-400">Pad </span>
           <span className="text-zinc-900 dark:text-zinc-100">{pad}</span>
         </div>
+        <div>
+          <span className="text-zinc-500 dark:text-zinc-400">Weather </span>
+          <span className="text-zinc-900 dark:text-zinc-100">
+            {forecast
+              ? `${forecast.temperature}°${forecast.temperatureUnit} · ${forecast.shortForecast} · ${forecast.windSpeed} ${forecast.windDirection}`
+              : "forecast not yet available"}
+          </span>
+        </div>
       </div>
     </article>
   );
 }
 
 export default async function Home() {
-  const launches = await getUpcomingLaunches();
+  const [launchesResult, weatherResult] = await Promise.allSettled([
+    getUpcomingLaunches(),
+    getCapeHourlyForecast(),
+  ]);
+
+  if (launchesResult.status === "rejected") {
+    throw launchesResult.reason;
+  }
+  const launches = launchesResult.value;
+  const hourly = weatherResult.status === "fulfilled" ? weatherResult.value : null;
 
   return (
     <main className="min-h-screen p-6 sm:p-8">
@@ -121,7 +149,11 @@ export default async function Home() {
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {launches.map((launch) => (
-          <LaunchCard key={launch.id} launch={launch} />
+          <LaunchCard
+            key={launch.id}
+            launch={launch}
+            forecast={hourly ? findForecastForTime(hourly, launch.net) : null}
+          />
         ))}
       </section>
     </main>
