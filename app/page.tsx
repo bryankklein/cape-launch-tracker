@@ -1,3 +1,5 @@
+import Countdown from "./Countdown";
+
 type Launch = {
   id: string;
   name: string;
@@ -79,6 +81,13 @@ function LaunchCard({ launch }: { launch: Launch }) {
 
       <h2 className="text-xl font-bold leading-tight">{rocket}</h2>
       <p className="text-zinc-600 dark:text-zinc-400">{mission}</p>
+
+      <div className="mt-2">
+        <Countdown
+          net={launch.net}
+          isApproximate={launch.status.abbrev === "TBD" || launch.status.abbrev === "TBC"}
+        />
+      </div>
 
       <div className="mt-2 space-y-1 text-sm">
         <div>
