@@ -22,6 +22,12 @@ type Launch = {
     name: string;
     location: { name: string };
   };
+  vidURLs?: Array<{
+    priority: number;
+    source: string;
+    publisher: string;
+    url: string;
+  }>;
 };
 
 type LaunchApiResponse = {
@@ -30,7 +36,7 @@ type LaunchApiResponse = {
 
 async function getUpcomingLaunches(): Promise<Launch[]> {
   const url =
-    "https://ll.thespacedevs.com/2.2.0/launch/upcoming/?location__ids=12,27&limit=10";
+    "https://ll.thespacedevs.com/2.2.0/launch/upcoming/?location__ids=12,27&limit=10&mode=detailed";
 
   const res = await fetch(url, { next: { revalidate: 60 } });
 
@@ -54,6 +60,12 @@ function formatLaunchTime(iso: string): string {
   });
 }
 
+function pickWatchUrl(vidURLs: Launch["vidURLs"]): string | null {
+  if (!vidURLs || vidURLs.length === 0) return null;
+  const youtube = vidURLs.find((v) => v.source === "youtube.com");
+  return (youtube ?? vidURLs[0]).url;
+}
+
 function statusBadgeClasses(abbrev: string): string {
   if (abbrev === "Go") {
     return "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300";
@@ -75,6 +87,7 @@ function LaunchCard({
     launch.rocket.configuration.full_name || launch.rocket.configuration.name;
   const mission = launch.mission?.name ?? "Mission TBD";
   const pad = `${launch.pad.name} · ${launch.pad.location.name}`;
+  const watchUrl = pickWatchUrl(launch.vidURLs);
 
   return (
     <article className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -120,6 +133,18 @@ function LaunchCard({
           </span>
         </div>
       </div>
+
+      {watchUrl && (
+        <a
+          href={watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+        >
+          <span aria-hidden>▶</span>
+          <span>Watch Live</span>
+        </a>
+      )}
     </article>
   );
 }
