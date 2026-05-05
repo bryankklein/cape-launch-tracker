@@ -31,3 +31,18 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true });
 }
+
+export async function DELETE(request: Request) {
+  let body: { endpoint?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  if (!body.endpoint) {
+    return Response.json({ error: "Missing endpoint" }, { status: 400 });
+  }
+
+  await redis.hdel(SUBSCRIPTIONS_KEY, body.endpoint);
+  return Response.json({ ok: true });
+}

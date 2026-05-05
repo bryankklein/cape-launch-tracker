@@ -134,15 +134,62 @@ export default async function Home() {
         </div>
       </header>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {launches.map((launch) => (
-          <LaunchCard
-            key={launch.id}
-            launch={launch}
-            forecast={hourly ? findForecastForTime(hourly, launch.net) : null}
-          />
-        ))}
-      </section>
+      {launches.length === 0 ? (
+        <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
+          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            🚀 No upcoming launches at the Cape right now.
+          </p>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            Check back soon — they happen pretty often.
+          </p>
+        </div>
+      ) : (
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {launches.map((launch) => (
+            <LaunchCard
+              key={launch.id}
+              launch={launch}
+              forecast={hourly ? findForecastForTime(hourly, launch.net) : null}
+            />
+          ))}
+        </section>
+      )}
+
+      <footer className="mt-12 border-t border-zinc-200 pt-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+        <p>
+          Launch data from{" "}
+          <a
+            href="https://thespacedevs.com/llapi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
+          >
+            The Space Devs Launch Library 2
+          </a>
+          . Weather from the{" "}
+          <a
+            href="https://api.weather.gov"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
+          >
+            National Weather Service
+          </a>
+          .
+        </p>
+        <p className="mt-2">
+          Source on{" "}
+          <a
+            href="https://github.com/bryankklein/cape-launch-tracker"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
+          >
+            GitHub
+          </a>{" "}
+          · Made near the Cape
+        </p>
+      </footer>
     </main>
   );
 }

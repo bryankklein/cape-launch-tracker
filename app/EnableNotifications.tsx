@@ -55,6 +55,28 @@ export default function EnableNotifications() {
       .catch(() => setStatus("idle"));
   }, []);
 
+  async function disable() {
+    setError(null);
+    setStatus("working");
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        const endpoint = sub.endpoint;
+        await sub.unsubscribe();
+        fetch("/api/subscribe", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint }),
+        }).catch(() => {});
+      }
+      setStatus("idle");
+    } catch (e) {
+      setStatus("error");
+      setError(e instanceof Error ? e.message : "Unknown error");
+    }
+  }
+
   async function enable() {
     setError(null);
     setStatus("working");
@@ -114,9 +136,18 @@ export default function EnableNotifications() {
 
   if (status === "subscribed") {
     return (
-      <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-        ✓ Notifications on
-      </p>
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold text-green-700 dark:text-green-400">
+          ✓ Notifications on
+        </span>
+        <button
+          type="button"
+          onClick={disable}
+          className="text-xs text-zinc-500 underline transition hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+        >
+          Turn off
+        </button>
+      </div>
     );
   }
 
