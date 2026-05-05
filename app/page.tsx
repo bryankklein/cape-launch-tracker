@@ -1,53 +1,11 @@
 import Countdown from "./Countdown";
 import EnableNotifications from "./EnableNotifications";
+import { getUpcomingLaunches, type Launch } from "./launches";
 import {
   findForecastForTime,
   getCapeHourlyForecast,
   type HourlyForecast,
 } from "./weather";
-
-type Launch = {
-  id: string;
-  name: string;
-  net: string;
-  status: { abbrev: string; name: string };
-  launch_service_provider: { name: string };
-  rocket: {
-    configuration: {
-      name: string;
-      full_name: string;
-    };
-  };
-  mission: { name: string } | null;
-  pad: {
-    name: string;
-    location: { name: string };
-  };
-  vidURLs?: Array<{
-    priority: number;
-    source: string;
-    publisher: string;
-    url: string;
-  }>;
-};
-
-type LaunchApiResponse = {
-  results: Launch[];
-};
-
-async function getUpcomingLaunches(): Promise<Launch[]> {
-  const url =
-    "https://ll.thespacedevs.com/2.2.0/launch/upcoming/?location__ids=12,27&limit=10&mode=detailed";
-
-  const res = await fetch(url, { next: { revalidate: 60 } });
-
-  if (!res.ok) {
-    throw new Error(`Launch API request failed: ${res.status}`);
-  }
-
-  const data = (await res.json()) as LaunchApiResponse;
-  return data.results;
-}
 
 function formatLaunchTime(iso: string): string {
   return new Date(iso).toLocaleString("en-US", {
