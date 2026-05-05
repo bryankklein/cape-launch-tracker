@@ -1,4 +1,5 @@
 import Countdown from "./Countdown";
+import EnableNotifications from "./EnableNotifications";
 import {
   findForecastForTime,
   getCapeHourlyForecast,
@@ -170,6 +171,9 @@ export default async function Home() {
         <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
           Upcoming rocket launches from Cape Canaveral.
         </p>
+        <div className="mt-4">
+          <EnableNotifications />
+        </div>
       </header>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
